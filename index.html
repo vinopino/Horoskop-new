@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sternenpalast">
+<meta name="theme-color" content="#FFF8EC">
+<title>Sternenpalast – Dein Horoskop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF8EC; --card:#FFFDF7; --ink:#3B2F5C; --ink-soft:#6E6390;
+  --gold:#D9A441; --gold-soft:#F3DDA6; --turq:#1E9E9A; --turq-soft:#D3EFEC;
+  --rose:#E2725B; --rose-soft:#FBE0D8; --lilac:#8C6BC4; --lilac-soft:#ECE3FA;
+  --shadow:0 10px 30px -12px rgba(120,86,30,.28);
+  --fire:#E2725B; --earth:#6F9A4E; --air:#4E9ACB; --water:#1E9E9A;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:"Nunito",-apple-system,system-ui,sans-serif;color:var(--ink);
+  background-color:var(--bg);
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'><g fill='none' stroke='%23DDB25E' stroke-opacity='.28' stroke-width='1'><rect x='24' y='24' width='24' height='24'/><rect x='24' y='24' width='24' height='24' transform='rotate(45 36 36)'/><circle cx='36' cy='36' r='5'/><path d='M0 0L14 14M72 0L58 14M0 72L14 58M72 72L58 58'/><circle cx='0' cy='0' r='6'/><circle cx='72' cy='0' r='6'/><circle cx='0' cy='72' r='6'/><circle cx='72' cy='72' r='6'/></g></svg>");
+  min-height:100vh;
+}
+.app{max-width:560px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 96px)}
+h1,h2,h3,.serif{font-family:"Marcellus",Georgia,serif;font-weight:400}
+
+/* Header */
+.top{display:flex;align-items:center;gap:12px;margin:4px 2px 14px}
+.logo{width:44px;height:44px;flex:none}
+.top h1{margin:0;font-size:25px;letter-spacing:.5px;line-height:1.05}
+.top .sub{font-size:13px;color:var(--ink-soft);font-weight:600}
+
+/* Ornament divider */
+.orn{display:flex;align-items:center;gap:10px;color:var(--gold);margin:22px 4px 12px}
+.orn::before,.orn::after{content:"";flex:1;height:1px;background:linear-gradient(90deg,transparent,var(--gold) 30%,var(--gold) 70%,transparent)}
+.orn span{font-family:"Marcellus",serif;font-size:17px;color:var(--ink);white-space:nowrap}
+.orn span::before,.orn span::after{content:"◆";color:var(--gold);font-size:9px;margin:0 8px;vertical-align:middle}
+
+/* Sign picker */
+.picker{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 10px;margin:0 -16px;padding-left:16px;padding-right:16px;scrollbar-width:none;scroll-snap-type:x proximity}
+.picker::-webkit-scrollbar{display:none}
+.chip{flex:none;scroll-snap-align:center;width:66px;padding:10px 4px 8px;border-radius:33px 33px 14px 14px;background:var(--card);border:1.5px solid var(--gold-soft);text-align:center;cursor:pointer;transition:transform .15s, background .2s;font:inherit;color:inherit}
+.chip:active{transform:scale(.95)}
+.chip .g{font-size:24px;line-height:1;display:block;font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.chip .n{font-size:10.5px;font-weight:700;margin-top:5px;display:block;color:var(--ink-soft)}
+.chip.on{background:linear-gradient(180deg,#FFE9B8,#FFF6DD);border-color:var(--gold);box-shadow:var(--shadow)}
+.chip.on .n{color:var(--ink)}
+
+/* Arch hero card */
+.arch{position:relative;margin-top:26px;background:var(--card);border:2px solid var(--gold);
+  border-radius:50% 50% 24px 24px / 120px 120px 24px 24px;padding:8px;box-shadow:var(--shadow)}
+.arch::before{content:"";position:absolute;left:50%;top:-17px;width:22px;height:22px;transform:translateX(-50%) rotate(45deg);
+  background:linear-gradient(135deg,#F7D27A,var(--gold));border-radius:4px 50% 4px 50%;box-shadow:0 2px 6px rgba(160,110,30,.3)}
+.arch-in{border:1.5px dashed rgba(30,158,154,.5);border-radius:50% 50% 18px 18px / 112px 112px 18px 18px;padding:34px 20px 22px;text-align:center;
+  background:radial-gradient(120% 70% at 50% 0%,#FFF1CF 0%,rgba(255,241,207,0) 60%)}
+.hero-glyph{width:86px;height:86px;margin:0 auto 6px;border-radius:50%;display:grid;place-items:center;font-size:46px;color:#fff;
+  font-family:"Segoe UI Symbol","Apple Symbols",serif;box-shadow:inset 0 -6px 14px rgba(0,0,0,.12),0 6px 16px -6px rgba(0,0,0,.3);position:relative}
+.hero-glyph::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1.5px solid var(--gold-soft)}
+.hero h2{margin:8px 0 0;font-size:30px}
+.dates{font-size:13px;color:var(--ink-soft);font-weight:700;letter-spacing:.3px}
+.today{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:999px;background:var(--turq-soft);color:#11706D;font-weight:800;font-size:13px}
+.theme{margin:14px auto 0;max-width:420px;font-size:14px;color:var(--ink-soft);font-style:italic}
+.maintext{font-size:17px;line-height:1.6;margin:16px 4px 4px;text-align:left}
+.stale{margin-top:10px;font-size:12.5px;color:#9A5B1E;background:#FFF0D6;border-radius:10px;padding:8px 10px}
+
+/* Aspect tiles */
+.aspects{display:grid;gap:10px;margin-top:14px}
+.asp{display:flex;gap:12px;align-items:flex-start;background:var(--card);border-radius:18px;padding:14px;border:1px solid #F1E3C4;box-shadow:0 4px 14px -10px rgba(120,86,30,.35)}
+.asp .ic{flex:none;width:38px;height:38px;border-radius:12px 12px 12px 12px;display:grid;place-items:center;font-size:19px}
+.asp h4{margin:0 0 3px;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--ink-soft);font-weight:800}
+.asp p{margin:0;font-size:15px;line-height:1.5}
+.asp.love .ic{background:var(--rose-soft)} .asp.job .ic{background:var(--turq-soft)} .asp.well .ic{background:var(--lilac-soft)} .asp.luck .ic{background:#FFF0C9}
+
+/* List of all signs */
+.acc{background:var(--card);border-radius:18px;border:1px solid #F1E3C4;overflow:hidden;box-shadow:0 4px 14px -10px rgba(120,86,30,.35)}
+.acc-row{border-top:1px solid #F4EAD5}
+.acc-row:first-child{border-top:0}
+.acc-h{display:flex;align-items:center;gap:12px;width:100%;padding:12px 14px;background:none;border:0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.mini{width:34px;height:34px;flex:none;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:18px;font-family:"Segoe UI Symbol","Apple Symbols",serif}
+.acc-h .t{flex:1;min-width:0}
+.acc-h .t b{display:block;font-size:15px}
+.acc-h .t small{display:block;color:var(--ink-soft);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.acc-h .ch{color:var(--gold);transition:transform .2s}
+.acc-row.open .ch{transform:rotate(90deg)}
+.acc-b{display:none;padding:0 16px 14px 60px;font-size:14.5px;line-height:1.55}
+.acc-row.open .acc-b{display:block}
+.acc-b p{margin:0 0 6px}
+.acc-b .k{font-weight:800;color:var(--ink-soft);font-size:12px;letter-spacing:.6px;text-transform:uppercase;margin-right:4px}
+
+/* Forecast */
+.day{position:relative;background:var(--card);border-radius:22px;padding:16px 16px 14px 16px;margin-bottom:12px;border:1px solid #F1E3C4;box-shadow:0 4px 14px -10px rgba(120,86,30,.35);display:flex;gap:14px}
+.cal{flex:none;width:58px;text-align:center;border-radius:29px 29px 12px 12px;background:linear-gradient(180deg,var(--turq),#167F7C);color:#fff;padding:10px 0 8px}
+.cal .wd{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;opacity:.9}
+.cal .d{font-family:"Marcellus",serif;font-size:26px;line-height:1.1}
+.cal .m{font-size:11px;font-weight:700;opacity:.9}
+.day .body{flex:1;min-width:0}
+.day .body h3{margin:0 0 4px;font-size:17px}
+.day .body p{margin:0 0 6px;font-size:15px;line-height:1.55}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 9px;border-radius:999px;background:#FFF0C9;color:#8A6216;margin:2px 4px 2px 0}
+.week{background:linear-gradient(160deg,#FFF4DA,#FDEBE5);border:1.5px solid var(--gold-soft);border-radius:26px;padding:18px}
+.week h3{margin:0 0 2px;font-size:20px}
+.week .range{font-size:13px;font-weight:700;color:var(--ink-soft)}
+.week p{font-size:15.5px;line-height:1.6;margin:10px 0}
+.events{list-style:none;margin:0;padding:0}
+.events li{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px dashed #EBD9B3}
+.events li:first-child{border-top:0}
+.events .dot{flex:none;width:30px;height:30px;border-radius:50%;background:var(--lilac-soft);display:grid;place-items:center;font-size:15px}
+.events b{display:block;font-size:13px;color:var(--ink-soft)}
+.events span{font-size:14.5px}
+
+/* Signs grid */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.tile{background:var(--card);border:1.5px solid var(--gold-soft);border-radius:60px 60px 16px 16px;padding:16px 6px 12px;text-align:center;cursor:pointer;font:inherit;color:inherit;box-shadow:0 4px 14px -10px rgba(120,86,30,.35);transition:transform .15s}
+.tile:active{transform:scale(.96)}
+.tile .mini{width:46px;height:46px;font-size:24px;margin:0 auto 8px}
+.tile b{display:block;font-family:"Marcellus",serif;font-weight:400;font-size:15.5px}
+.tile small{display:block;font-size:11px;color:var(--ink-soft);font-weight:700;margin-top:2px}
+.tile.me{border-color:var(--gold);background:linear-gradient(180deg,#FFF0C9,var(--card))}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+.legend span{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--card);border:1px solid #F1E3C4}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:0}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(59,47,92,.35);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .25s;z-index:30}
+.scrim.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;max-height:88vh;overflow-y:auto;background:var(--bg);z-index:31;
+  border-radius:50% 50% 0 0 / 70px 70px 0 0;border-top:2px solid var(--gold);transform:translateY(105%);visibility:hidden;transition:transform .32s cubic-bezier(.2,.8,.2,1),visibility 0s .32s;
+  padding:30px 20px calc(env(safe-area-inset-bottom) + 24px);max-width:600px;margin:0 auto;box-shadow:0 -10px 40px -10px rgba(59,47,92,.35)}
+.sheet.on{transform:translateY(0);visibility:visible;transition:transform .32s cubic-bezier(.2,.8,.2,1)}
+.sheet .x{position:absolute;right:18px;top:44px;width:34px;height:34px;border-radius:50%;border:0;background:var(--card);font-size:18px;color:var(--ink-soft);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.sheet .head{text-align:center}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0 4px}
+.fact{background:var(--card);border-radius:14px;padding:10px 6px;text-align:center;border:1px solid #F1E3C4}
+.fact small{display:block;font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:800}
+.fact b{display:block;font-size:14px;margin-top:3px}
+.sec{background:var(--card);border-radius:18px;padding:14px 16px;margin-top:10px;border:1px solid #F1E3C4}
+.sec h4{margin:0 0 6px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--ink-soft);font-weight:800}
+.sec p{margin:0;font-size:15px;line-height:1.55}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:13px;font-weight:700;padding:5px 11px;border-radius:999px}
+.pill.plus{background:var(--turq-soft);color:#11706D}
+.pill.minus{background:var(--rose-soft);color:#A3452F}
+.cta{display:block;width:100%;margin-top:16px;padding:14px;border:0;border-radius:16px;font:inherit;font-weight:800;font-size:15.5px;color:#fff;cursor:pointer;
+  background:linear-gradient(135deg,var(--turq),#167F7C);box-shadow:0 8px 20px -10px rgba(30,158,154,.8)}
+
+/* States */
+.note{text-align:center;color:var(--ink-soft);font-size:14.5px;line-height:1.5;padding:22px 14px;background:var(--card);border-radius:18px;border:1px dashed var(--gold-soft)}
+.spin{width:30px;height:30px;margin:0 auto 10px;border-radius:50%;border:3px solid var(--gold-soft);border-top-color:var(--gold);animation:sp 1s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.src{margin-top:16px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.6}
+.src a{color:var(--turq);font-weight:700;text-decoration:none}
+.fine{font-size:11.5px;color:#A196B8;text-align:center;margin-top:18px}
+
+/* Tab bar */
+.tabbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom) + 10px);z-index:20;display:flex;gap:4px;
+  background:rgba(255,253,247,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1.5px solid var(--gold-soft);border-radius:28px;padding:6px;box-shadow:0 12px 30px -12px rgba(120,86,30,.45);width:min(94vw,420px)}
+.tabbar button{flex:1;border:0;background:none;font:inherit;color:var(--ink-soft);padding:7px 4px;border-radius:22px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:11.5px;font-weight:800}
+.tabbar svg{width:22px;height:22px}
+.tabbar button.on{background:linear-gradient(180deg,#FFE9B8,#FFF3D6);color:var(--ink)}
+.view{display:none;animation:fade .3s ease}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <svg class="logo" viewBox="0 0 48 48" aria-hidden="true">
+      <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F7D27A"/><stop offset="1" stop-color="#D9A441"/></linearGradient></defs>
+      <path d="M24 3 L29 13 L40 10 L36 21 L45 27 L35 31 L37 42 L27 37 L24 46 L21 37 L11 42 L13 31 L3 27 L12 21 L8 10 L19 13 Z" fill="url(#lg)"/>
+      <path d="M28.5 17a9 9 0 1 0 2.5 13 7 7 0 1 1-2.5-13z" fill="#FFFDF7"/>
+      <circle cx="30" cy="20" r="1.6" fill="#1E9E9A"/>
+    </svg>
+    <div>
+      <h1>Sternenpalast</h1>
+      <div class="sub" id="subline">Dein tägliches Horoskop</div>
+    </div>
+  </header>
+
+  <!-- HEUTE -->
+  <section class="view on" id="v-heute">
+    <div class="picker" id="picker1"></div>
+    <div id="today"></div>
+    <div class="orn"><span>Alle Sternzeichen heute</span></div>
+    <div id="alltoday"></div>
+    <div class="src" id="src-today"></div>
+  </section>
+
+  <!-- VORSCHAU -->
+  <section class="view" id="v-vorschau">
+    <div class="picker" id="picker2"></div>
+    <div class="orn"><span id="fc-title">Die nächsten Tage</span></div>
+    <div id="forecast"></div>
+    <div class="orn"><span>Deine Woche</span></div>
+    <div id="weekbox"></div>
+    <div class="orn"><span>Himmelsereignisse</span></div>
+    <div id="events"></div>
+    <div class="src" id="src-week"></div>
+  </section>
+
+  <!-- STERNZEICHEN -->
+  <section class="view" id="v-zeichen">
+    <div class="orn" style="margin-top:6px"><span>Die zwölf Tierkreiszeichen</span></div>
+    <div class="legend">
+      <span><i style="background:var(--fire)"></i>Feuer</span>
+      <span><i style="background:var(--earth)"></i>Erde</span>
+      <span><i style="background:var(--air)"></i>Luft</span>
+      <span><i style="background:var(--water)"></i>Wasser</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <p class="fine">Tippe auf ein Zeichen für Eigenschaften, Stärken und Besonderheiten.</p>
+  </section>
+
+  <p class="fine">Horoskope werden täglich aus aktuellen Quellen im Netz zusammengefasst und dienen der Unterhaltung.</p>
+</div>
+
+<nav class="tabbar" role="tablist">
+  <button class="on" data-tab="heute" role="tab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+    Heute</button>
+  <button data-tab="vorschau" role="tab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 3.5a8.5 8.5 0 1 0 5 13.6A7 7 0 0 1 15.5 3.5z"/><path d="M17 8l.7 1.6 1.6.7-1.6.7L17 12.6l-.7-1.6-1.6-.7 1.6-.7z"/></svg>
+    Vorschau</button>
+  <button data-tab="zeichen" role="tab">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 2.8l2.1 4.6 5-.8-2.9 4.1 2.9 4.1-5-.8L12 18.6 9.9 14l-5 .8 2.9-4.1-2.9-4.1 5 .8z"/><circle cx="12" cy="10.7" r="1.6"/><path d="M8 21h8"/></svg>
+    Sternzeichen</button>
+</nav>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" aria-modal="true" role="dialog"></aside>
+
+<script>
+const VS = "︎"; // force text glyphs on iOS
+const EL = {
+  Feuer:{c:"var(--fire)",g:"linear-gradient(145deg,#F29A7E,#E2725B)"},
+  Erde:{c:"var(--earth)",g:"linear-gradient(145deg,#9CC07A,#6F9A4E)"},
+  Luft:{c:"var(--air)",g:"linear-gradient(145deg,#86C0E6,#4E9ACB)"},
+  Wasser:{c:"var(--water)",g:"linear-gradient(145deg,#5CC6C1,#1E9E9A)"}
+};
+const SIGNS = [
+ {k:"widder",n:"Widder",g:"♈",d:"21.03. – 20.04.",el:"Feuer",pl:"Mars",q:"Kardinal",
+  motto:"Ich bin – und ich lege los.",
+  plus:["mutig","tatkräftig","direkt","begeisterungsfähig","ehrlich"],
+  minus:["ungeduldig","impulsiv","hitzköpfig"],
+  bes:"Der Widder eröffnet den Tierkreis und ist der geborene Pionier. Er liebt Anfänge, Herausforderungen und Wettbewerb und steckt andere mit seiner Energie an. Ärger verraucht bei ihm so schnell, wie er gekommen ist.",
+  liebe:"Leidenschaftlich und erobernd – er braucht Spannung und einen Partner, der mithalten kann.",
+  passt:"Löwe, Schütze, Zwillinge, Wassermann", stein:"Karneol", farbe:"Rot", tag:"Dienstag"},
+ {k:"stier",n:"Stier",g:"♉",d:"21.04. – 20.05.",el:"Erde",pl:"Venus",q:"Fix",
+  motto:"Ich habe – und ich genieße.",
+  plus:["zuverlässig","geduldig","genussfreudig","treu","bodenständig"],
+  minus:["stur","besitzergreifend","veränderungsscheu"],
+  bes:"Der Stier baut Schritt für Schritt etwas Beständiges auf. Er hat einen ausgeprägten Sinn für Schönheit, Natur, gutes Essen und schöne Dinge. Wer sein Vertrauen gewinnt, hat einen Freund fürs Leben.",
+  liebe:"Sinnlich, treu und beständig – Sicherheit und Zärtlichkeit sind ihm wichtiger als Drama.",
+  passt:"Jungfrau, Steinbock, Krebs, Fische", stein:"Smaragd", farbe:"Grün", tag:"Freitag"},
+ {k:"zwillinge",n:"Zwillinge",g:"♊",d:"21.05. – 21.06.",el:"Luft",pl:"Merkur",q:"Beweglich",
+  motto:"Ich denke – und ich teile es mit.",
+  plus:["neugierig","kommunikativ","witzig","vielseitig","anpassungsfähig"],
+  minus:["sprunghaft","unruhig","leicht abgelenkt"],
+  bes:"Zwillinge haben zwei Seiten und tausend Interessen. Sie lernen schnell, knüpfen mühelos Kontakte und sind brillante Gesprächspartner. Routine langweilt sie – Abwechslung hält sie lebendig.",
+  liebe:"Verspielt und geistreich – sie verlieben sich zuerst in den Kopf ihres Gegenübers.",
+  passt:"Waage, Wassermann, Widder, Löwe", stein:"Citrin", farbe:"Gelb", tag:"Mittwoch"},
+ {k:"krebs",n:"Krebs",g:"♋",d:"22.06. – 22.07.",el:"Wasser",pl:"Mond",q:"Kardinal",
+  motto:"Ich fühle – und ich beschütze.",
+  plus:["fürsorglich","einfühlsam","treu","intuitiv","fantasievoll"],
+  minus:["launisch","empfindlich","zieht sich zurück"],
+  bes:"Unter der harten Schale steckt ein sehr weicher Kern. Familie, Zuhause und Erinnerungen bedeuten dem Krebs alles. Er spürt Stimmungen sofort und kümmert sich liebevoll um seine Menschen.",
+  liebe:"Romantisch und hingebungsvoll – er sucht Geborgenheit und ein echtes Nest.",
+  passt:"Skorpion, Fische, Stier, Jungfrau", stein:"Mondstein", farbe:"Silber & Perlweiß", tag:"Montag"},
+ {k:"loewe",n:"Löwe",g:"♌",d:"23.07. – 23.08.",el:"Feuer",pl:"Sonne",q:"Fix",
+  motto:"Ich will – und ich strahle.",
+  plus:["großzügig","herzlich","selbstbewusst","kreativ","loyal"],
+  minus:["stolz","dominant","braucht Anerkennung"],
+  bes:"Der Löwe wird von der Sonne regiert und steht gern im Mittelpunkt. Er führt mit Herz, ist ein großzügiger Gastgeber und begeistert mit Wärme und Kreativität. Ehrliche Wertschätzung lässt ihn aufblühen.",
+  liebe:"Großherzig und leidenschaftlich – er verwöhnt gern und möchte bewundert werden.",
+  passt:"Widder, Schütze, Zwillinge, Waage", stein:"Rubin", farbe:"Gold & Orange", tag:"Sonntag"},
+ {k:"jungfrau",n:"Jungfrau",g:"♍",d:"24.08. – 23.09.",el:"Erde",pl:"Merkur",q:"Beweglich",
+  motto:"Ich analysiere – und ich helfe.",
+  plus:["gewissenhaft","analytisch","hilfsbereit","praktisch","bescheiden"],
+  minus:["perfektionistisch","kritisch","grübelt viel"],
+  bes:"Die Jungfrau hat ein Auge für jedes Detail und bringt Ordnung ins Chaos. Sie hilft gern ganz konkret und achtet auf Gesundheit und Alltag. Hinter ihrer Zurückhaltung steckt ein feiner Humor.",
+  liebe:"Zeigt Liebe durch Taten und Fürsorge – Vertrauen wächst bei ihr langsam, aber tief.",
+  passt:"Stier, Steinbock, Krebs, Skorpion", stein:"Saphir", farbe:"Salbeigrün & Beige", tag:"Mittwoch"},
+ {k:"waage",n:"Waage",g:"♎",d:"24.09. – 23.10.",el:"Luft",pl:"Venus",q:"Kardinal",
+  motto:"Ich gleiche aus – und verbinde.",
+  plus:["charmant","diplomatisch","gerecht","stilvoll","gesellig"],
+  minus:["unentschlossen","konfliktscheu","harmoniesüchtig"],
+  bes:"Die Waage ist das einzige Tierkreiszeichen, das ein Gegenstand ist – ein Symbol für Ausgleich. Sie liebt Schönheit, Kunst und faire Lösungen und bringt Menschen zusammen.",
+  liebe:"Romantisch und partnerschaftlich – zu zweit fühlt sie sich am vollständigsten.",
+  passt:"Zwillinge, Wassermann, Löwe, Schütze", stein:"Opal", farbe:"Rosé & Hellblau", tag:"Freitag"},
+ {k:"skorpion",n:"Skorpion",g:"♏",d:"24.10. – 22.11.",el:"Wasser",pl:"Pluto & Mars",q:"Fix",
+  motto:"Ich ergründe – und verwandle.",
+  plus:["leidenschaftlich","loyal","willensstark","intuitiv","tiefgründig"],
+  minus:["misstrauisch","eifersüchtig","nachtragend"],
+  bes:"Der Skorpion ist das Zeichen der Verwandlung – wie der Phönix, der aus der Asche aufsteigt. Er durchschaut Menschen schnell, bewahrt Geheimnisse und geht allem auf den Grund. Seine Intensität ist seine Superkraft.",
+  liebe:"Ganz oder gar nicht – tief, treu und magnetisch, mit einem großen Bedürfnis nach Ehrlichkeit.",
+  passt:"Krebs, Fische, Jungfrau, Steinbock", stein:"Topas", farbe:"Bordeaux & Tiefrot", tag:"Dienstag"},
+ {k:"schuetze",n:"Schütze",g:"♐",d:"23.11. – 21.12.",el:"Feuer",pl:"Jupiter",q:"Beweglich",
+  motto:"Ich sehe – und ich ziehe los.",
+  plus:["optimistisch","abenteuerlustig","ehrlich","großzügig","weltoffen"],
+  minus:["ungeduldig","taktlos","freiheitsliebend bis bindungsscheu"],
+  bes:"Der Schütze ist der Sinnsucher des Tierkreises. Reisen, Philosophie und neue Horizonte ziehen ihn magisch an, und sein Humor macht jede Runde heller. Er glaubt fest daran, dass alles gut wird.",
+  liebe:"Spontan und herzlich – er braucht einen Partner, der Abenteuer und Freiraum teilt.",
+  passt:"Widder, Löwe, Waage, Wassermann", stein:"Türkis", farbe:"Violett", tag:"Donnerstag"},
+ {k:"steinbock",n:"Steinbock",g:"♑",d:"22.12. – 20.01.",el:"Erde",pl:"Saturn",q:"Kardinal",
+  motto:"Ich baue – und ich erreiche.",
+  plus:["ehrgeizig","diszipliniert","verantwortungsvoll","geduldig","verlässlich"],
+  minus:["streng","pessimistisch","arbeitsfixiert"],
+  bes:"Der Steinbock ist der Gipfelstürmer: Er steigt Schritt für Schritt nach oben und gibt nicht auf. Er hat einen herrlich trockenen Humor und wird oft mit den Jahren lockerer und gelassener.",
+  liebe:"Zurückhaltend am Anfang, dann zutiefst treu – er denkt in langfristigen Bindungen.",
+  passt:"Stier, Jungfrau, Skorpion, Fische", stein:"Granat", farbe:"Braun & Dunkelgrün", tag:"Samstag"},
+ {k:"wassermann",n:"Wassermann",g:"♒",d:"21.01. – 19.02.",el:"Luft",pl:"Uranus & Saturn",q:"Fix",
+  motto:"Ich weiß – und ich erneuere.",
+  plus:["originell","freiheitsliebend","visionär","menschenfreundlich","tolerant"],
+  minus:["distanziert","eigensinnig","unberechenbar"],
+  bes:"Der Wassermann ist der Querdenker und Erfinder des Tierkreises. Er setzt sich für Gemeinschaft und Fortschritt ein und hat oft einen großen, bunten Freundeskreis. Normen hinterfragt er mit Vergnügen.",
+  liebe:"Freundschaft zuerst – er braucht geistige Verbundenheit und viel Freiraum.",
+  passt:"Zwillinge, Waage, Widder, Schütze", stein:"Amethyst", farbe:"Türkis & Elektrikblau", tag:"Samstag"},
+ {k:"fische",n:"Fische",g:"♓",d:"20.02. – 20.03.",el:"Wasser",pl:"Neptun & Jupiter",q:"Beweglich",
+  motto:"Ich glaube – und ich träume.",
+  plus:["mitfühlend","fantasievoll","intuitiv","kreativ","hilfsbereit"],
+  minus:["verträumt","grenzenlos","weicht Konflikten aus"],
+  bes:"Als letztes Zeichen tragen die Fische etwas von allen anderen in sich. Sie sind künstlerisch, spirituell und spüren, was unausgesprochen bleibt. Musik, Wasser und Rückzugsorte geben ihnen Kraft.",
+  liebe:"Romantisch und selbstlos – sie lieben bedingungslos und träumen von Seelenverwandtschaft.",
+  passt:"Krebs, Skorpion, Stier, Steinbock", stein:"Aquamarin", farbe:"Meergrün", tag:"Donnerstag"}
+];
+const BYK = Object.fromEntries(SIGNS.map(s=>[s.k,s]));
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function berlinToday(){
+  try{ return new Intl.DateTimeFormat("en-CA",{timeZone:"Europe/Berlin",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date()); }
+  catch(e){ const d=new Date(); return d.toISOString().slice(0,10); }
+}
+const TODAY = berlinToday();
+const asDate = iso => new Date(iso + "T12:00:00");
+const fmtLong = iso => asDate(iso).toLocaleDateString("de-DE",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+const fmtShort = iso => asDate(iso).toLocaleDateString("de-DE",{day:"numeric",month:"long"});
+const wd = iso => asDate(iso).toLocaleDateString("de-DE",{weekday:"short"}).replace(".","");
+const mon = iso => asDate(iso).toLocaleDateString("de-DE",{month:"short"});
+const glyph = s => s.g + VS;
+const orb = (s, cls="mini") => `<span class="${cls}" style="background:${EL[s.el].g}">${glyph(s)}</span>`;
+const safeUrl = u => /^https:\/\//i.test(String(u||"")) ? String(u) : null;
+function sourcesHtml(list){
+  if(!Array.isArray(list) || !list.length) return "";
+  const parts = list.map(q => { const u = safeUrl(q && q.url); const n = esc(q && q.name || "Quelle");
+    return u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${n}</a>` : n; });
+  return "Zusammengefasst nach: " + parts.join(" · ");
+}
+
+/* ---------- state ---------- */
+let sign = "skorpion";           // App startet immer mit Skorpion
+let tab = "heute";
+let days = [];                   // horoskope docs, asc by datum
+let weeks = [];                  // wochen docs, asc by von
+let status = "loading";          // loading | ready | nodb | slow | error
+let openRows = new Set();
+
+/* ---------- pickers ---------- */
+function renderPickers(){
+  const html = SIGNS.map(s => `<button class="chip${s.k===sign?" on":""}" data-sign="${s.k}" aria-pressed="${s.k===sign}">
+      <span class="g" style="color:${EL[s.el].c}">${glyph(s)}</span><span class="n">${s.n}</span></button>`).join("");
+  ["#picker1","#picker2"].forEach(id => { const el=$(id); el.innerHTML = html; });
+  requestAnimationFrame(centerChips);
+}
+function centerChips(){
+  document.querySelectorAll(".view.on .picker .chip.on").forEach(c=>{
+    const p=c.parentElement; p.scrollLeft = c.offsetLeft - p.offsetLeft - p.clientWidth/2 + c.clientWidth/2;
+  });
+}
+document.addEventListener("click", e => {
+  const c = e.target.closest(".chip"); if(!c) return;
+  sign = c.dataset.sign; renderAll();
+});
+
+/* ---------- data selection ---------- */
+function currentDay(){
+  const exact = days.find(d => d.datum === TODAY);
+  if(exact) return {doc:exact, stale:false};
+  const past = days.filter(d => d.datum < TODAY);
+  if(past.length) return {doc:past[past.length-1], stale:true};
+  return {doc:null, stale:false};
+}
+function currentWeek(){
+  return weeks.find(w => w.von <= TODAY && w.bis >= TODAY) || weeks.filter(w=>w.von<=TODAY).pop() || null;
+}
+
+/* ---------- HEUTE ---------- */
+function loadingNote(){
+  if(status==="loading") return `<div class="note"><div class="spin"></div>Die Sterne werden gelesen …</div>`;
+  if(status==="slow") return `<div class="note">Die Horoskope lassen sich gerade nicht laden. Prüfe deine Verbindung – die Seite versucht es weiter.</div>`;
+  if(status==="nodb") return `<div class="note">Die Horoskope sind nur angemeldet in Claude abrufbar. Öffne die App über deinen Link und melde dich an.</div>`;
+  if(status==="error") return `<div class="note">Die Horoskope konnten nicht geladen werden. Bitte öffne die App später noch einmal.</div>`;
+  return `<div class="note">Für heute ist noch kein Horoskop eingetroffen. Es wird jeden Morgen frisch aus dem Netz geholt – schau gleich noch einmal vorbei.</div>`;
+}
+function aspectTiles(h){
+  const t=[];
+  if(h.liebe) t.push(`<div class="asp love"><div class="ic">❤️</div><div><h4>Liebe</h4><p>${esc(h.liebe)}</p></div></div>`);
+  if(h.beruf) t.push(`<div class="asp job"><div class="ic">💼</div><div><h4>Beruf</h4><p>${esc(h.beruf)}</p></div></div>`);
+  if(h.wohlbefinden) t.push(`<div class="asp well"><div class="ic">🌿</div><div><h4>Wohlbefinden</h4><p>${esc(h.wohlbefinden)}</p></div></div>`);
+  if(h.tipp) t.push(`<div class="asp luck"><div class="ic">✨</div><div><h4>Tipp des Tages</h4><p>${esc(h.tipp)}</p></div></div>`);
+  return t.length ? `<div class="aspects">${t.join("")}</div>` : "";
+}
+function renderToday(){
+  const s = BYK[sign];
+  const {doc, stale} = currentDay();
+  const h = doc && doc.zeichen && doc.zeichen[sign];
+  let inner = `<div class="hero-glyph" style="background:${EL[s.el].g}">${glyph(s)}</div>
+    <h2>${s.n}</h2><div class="dates">${s.d} · ${s.el} · ${s.pl}</div>
+    <div class="today">${fmtLong(doc ? doc.datum : TODAY)}</div>`;
+  if(doc && doc.thema) inner += `<div class="theme">${esc(doc.thema)}${doc.mond?` · ${esc(doc.mond)}`:""}</div>`;
+  if(h && h.text) inner += `<p class="maintext">${esc(h.text)}</p>`;
+  if(stale) inner += `<div class="stale">Das Horoskop für heute ist noch unterwegs – hier siehst du das neueste vom ${fmtShort(doc.datum)}.</div>`;
+  $("#today").innerHTML = `<div class="arch hero"><div class="arch-in">${inner}</div></div>` +
+    (h ? aspectTiles(h) : `<div style="margin-top:14px">${loadingNote()}</div>`);
+
+  // all signs
+  if(!doc){ $("#alltoday").innerHTML = status==="ready" ? "" : ""; $("#src-today").innerHTML="";
+    $("#alltoday").previousElementSibling.style.display = "none"; return; }
+  $("#alltoday").previousElementSibling.style.display = "";
+  $("#alltoday").innerHTML = `<div class="acc">` + SIGNS.map(x => {
+    const z = (doc.zeichen||{})[x.k]; if(!z) return "";
+    const open = openRows.has(x.k);
+    const det = [z.liebe&&`<p><span class="k">Liebe</span>${esc(z.liebe)}</p>`, z.beruf&&`<p><span class="k">Beruf</span>${esc(z.beruf)}</p>`,
+                 z.wohlbefinden&&`<p><span class="k">Wohl</span>${esc(z.wohlbefinden)}</p>`].filter(Boolean).join("");
+    return `<div class="acc-row${open?" open":""}" data-row="${x.k}">
+      <button class="acc-h">${orb(x)}<span class="t"><b>${x.n}${x.k===sign?" · dein Zeichen":""}</b><small>${esc(z.kurz || z.text || "")}</small></span><span class="ch">›</span></button>
+      <div class="acc-b"><p>${esc(z.text||"")}</p>${det}</div></div>`;
+  }).join("") + `</div>`;
+  $("#src-today").innerHTML = sourcesHtml(doc.quellen);
+}
+document.addEventListener("click", e => {
+  const h = e.target.closest(".acc-h"); if(!h) return;
+  const row = h.parentElement; const k=row.dataset.row;
+  row.classList.toggle("open"); row.classList.contains("open") ? openRows.add(k) : openRows.delete(k);
+});
+
+/* ---------- VORSCHAU ---------- */
+function renderForecast(){
+  const s = BYK[sign];
+  $("#fc-title").textContent = `Die nächsten Tage · ${s.n}`;
+  const fut = days.filter(d => d.datum > TODAY).slice(0,7);
+  if(status!=="ready"){ $("#forecast").innerHTML = loadingNote(); }
+  else if(!fut.length){
+    $("#forecast").innerHTML = `<div class="note">Die Vorschau für morgen erscheint, sobald die ersten Seiten sie veröffentlichen – meist am Vorabend.</div>`;
+  } else {
+    $("#forecast").innerHTML = fut.map(d => {
+      const z = (d.zeichen||{})[sign];
+      const body = z ? `<p>${esc(z.text)}</p>` : `<p style="color:var(--ink-soft)">Für ${s.n} liegt für diesen Tag noch nichts vor.</p>`;
+      return `<div class="day"><div class="cal"><div class="wd">${wd(d.datum)}</div><div class="d">${asDate(d.datum).getDate()}</div><div class="m">${mon(d.datum)}</div></div>
+        <div class="body"><h3>${esc(d.thema || "Tagesausblick")}</h3>${d.mond?`<span class="tag">☾ ${esc(d.mond)}</span>`:""}${body}</div></div>`;
+    }).join("");
+  }
+
+  const w = currentWeek();
+  const nextW = weeks.filter(x => x.von > TODAY);
+  if(!w && !nextW.length){
+    $("#weekbox").innerHTML = status==="ready" ? `<div class="note">Das Wochenhoroskop folgt in Kürze.</div>` : "";
+    $("#events").innerHTML = ""; $("#src-week").innerHTML = ""; return;
+  }
+  const weekCard = wk => { const z=(wk.zeichen||{})[sign];
+    return `<div class="week" style="margin-bottom:12px"><h3><span class="mini" style="display:inline-grid;vertical-align:middle;margin-right:8px;width:30px;height:30px;font-size:16px;background:${EL[s.el].g}">${glyph(s)}</span>${esc(wk.thema || "Wochenhoroskop")}</h3>
+      <div class="range">${fmtShort(wk.von)} – ${fmtShort(wk.bis)}</div>
+      ${z ? `<p>${esc(z.text)}</p>${z.glueckstag?`<span class="tag">🍀 Glückstag: ${esc(z.glueckstag)}</span>`:""}` : `<p>Für ${s.n} liegt noch kein Wochentext vor.</p>`}</div>`; };
+  $("#weekbox").innerHTML = [w, ...nextW].filter(Boolean).map(weekCard).join("");
+  const evs = [w, ...nextW].filter(Boolean).flatMap(x => Array.isArray(x.ereignisse)?x.ereignisse:[]);
+  const icon = t => /neumond/i.test(t)?"🌑":/vollmond/i.test(t)?"🌕":/merkur/i.test(t)?"☿":/venus/i.test(t)?"♀":/mars/i.test(t)?"♂":/mond/i.test(t)?"☾":"✦";
+  $("#events").innerHTML = evs.length ? `<div class="acc" style="padding:4px 14px"><ul class="events">${evs.map(e=>`<li><span class="dot">${icon(e.text||"")}</span><div><b>${e.datum?esc(fmtLong(e.datum)):""}</b><span>${esc(e.text)}</span></div></li>`).join("")}</ul></div>` : "";
+  $("#src-week").innerHTML = sourcesHtml([w,...nextW].filter(Boolean).flatMap(x=>x.quellen||[]));
+}
+
+/* ---------- STERNZEICHEN ---------- */
+function renderGrid(){
+  $("#grid").innerHTML = SIGNS.map(s => `<button class="tile${s.k==="skorpion"?" me":""}" data-detail="${s.k}">${orb(s)}<b>${s.n}</b><small>${s.d}</small></button>`).join("");
+}
+function openDetail(k){
+  const s = BYK[k];
+  $("#sheet").innerHTML = `<button class="x" aria-label="Schließen">✕</button>
+    <div class="head"><div class="hero-glyph" style="background:${EL[s.el].g}">${glyph(s)}</div>
+    <h2 style="margin:6px 0 0;font-size:28px">${s.n}</h2><div class="dates">${s.d}</div>
+    <div class="theme">„${s.motto}“</div></div>
+    <div class="facts">
+      <div class="fact"><small>Element</small><b style="color:${EL[s.el].c}">${s.el}</b></div>
+      <div class="fact"><small>Planet</small><b>${s.pl}</b></div>
+      <div class="fact"><small>Qualität</small><b>${s.q}</b></div>
+      <div class="fact"><small>Glücksstein</small><b>${s.stein}</b></div>
+      <div class="fact"><small>Farbe</small><b>${s.farbe}</b></div>
+      <div class="fact"><small>Glückstag</small><b>${s.tag}</b></div>
+    </div>
+    <div class="sec"><h4>Besonderheiten</h4><p>${s.bes}</p></div>
+    <div class="sec"><h4>Stärken</h4><div class="pills">${s.plus.map(p=>`<span class="pill plus">${p}</span>`).join("")}</div></div>
+    <div class="sec"><h4>Schwächen</h4><div class="pills">${s.minus.map(p=>`<span class="pill minus">${p}</span>`).join("")}</div></div>
+    <div class="sec"><h4>In der Liebe</h4><p>${s.liebe}</p><p style="margin-top:8px"><b>Passt gut zu:</b> ${s.passt}</p></div>
+    <button class="cta" data-goto="${s.k}">Tageshoroskop ${s.n} ansehen</button>`;
+  $("#sheet").scrollTop = 0;
+  $("#sheet").classList.add("on"); $("#scrim").classList.add("on");
+}
+function closeDetail(){ $("#sheet").classList.remove("on"); $("#scrim").classList.remove("on"); }
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-detail]"); if(t){ openDetail(t.dataset.detail); return; }
+  if(e.target.closest(".x") || e.target.id==="scrim"){ closeDetail(); return; }
+  const g = e.target.closest("[data-goto]"); if(g){ sign=g.dataset.goto; closeDetail(); setTab("heute"); renderAll(); window.scrollTo({top:0,behavior:"smooth"}); }
+});
+
+/* ---------- tabs ---------- */
+function setTab(t){
+  tab = t;
+  document.querySelectorAll(".tabbar button").forEach(b => b.classList.toggle("on", b.dataset.tab===t));
+  $("#v-heute").classList.toggle("on", t==="heute");
+  $("#v-vorschau").classList.toggle("on", t==="vorschau");
+  $("#v-zeichen").classList.toggle("on", t==="zeichen");
+  window.scrollTo(0,0);
+  requestAnimationFrame(centerChips);
+}
+document.querySelectorAll(".tabbar button").forEach(b => b.addEventListener("click", () => setTab(b.dataset.tab)));
+
+function renderAll(){ renderPickers(); renderToday(); renderForecast(); }
+
+/* ---------- data ---------- */
+async function connect(){
+  let db = null;
+  try{ db = window.claude && window.claude.use ? await window.claude.use("db") : null; }catch(e){ db = null; }
+  if(!db){ status = "nodb"; renderAll(); return; }
+  let gotDays=false, gotWeeks=false;
+  const timer = setTimeout(() => { if(!(gotDays&&gotWeeks)){ status = days.length? "ready":"slow"; renderAll(); } }, 10000);
+  const clean = arr => arr.filter(d => d && typeof d.datum==="string" || d && typeof d.von==="string");
+  db.collection("horoskope").orderBy("datum","desc").limit(21).onSnapshot(snap => {
+    days = clean(snap.docs.filter(d=>d.exists).map(d=>d.data())).sort((a,b)=>a.datum<b.datum?-1:1);
+    if(!snap.metadata.fromCache){ gotDays = true; }
+    if(gotDays && gotWeeks) clearTimeout(timer);
+    status = "ready"; renderAll();
+  }, err => { clearTimeout(timer); status = days.length ? "ready" : "error"; renderAll(); });
+  db.collection("wochen").orderBy("von","desc").limit(4).onSnapshot(snap => {
+    weeks = clean(snap.docs.filter(d=>d.exists).map(d=>d.data())).sort((a,b)=>a.von<b.von?-1:1);
+    if(!snap.metadata.fromCache){ gotWeeks = true; }
+    if(gotDays && gotWeeks) clearTimeout(timer);
+    renderForecast();
+  }, err => { renderForecast(); });
+}
+
+renderGrid();
+renderAll();
+connect();
+</script>
+</body>
+</html>
